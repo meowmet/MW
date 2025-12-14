@@ -1,0 +1,48 @@
+{
+  "out_name": "m19_seed999",
+  "seed": 999,
+  "test_size": 0.2,
+  "clip_lo_value": 90000.0,
+  "clip_hi_value": 9712999.99999992,
+  "model_params": {
+    "boosting_type": "gbdt",
+    "class_weight": null,
+    "colsample_bytree": 0.35,
+    "importance_type": "split",
+    "learning_rate": 0.012,
+    "max_depth": 6,
+    "min_child_samples": 200,
+    "min_child_weight": 0.001,
+    "min_split_gain": 0.0,
+    "n_estimators": 30000,
+    "n_jobs": 10,
+    "num_leaves": 24,
+    "objective": "regression",
+    "random_state": 999,
+    "reg_alpha": 10.0,
+    "reg_lambda": 120.0,
+    "subsample": 0.65,
+    "subsample_for_bin": 200000,
+    "subsample_freq": 1,
+    "metric": "rmse",
+    "extra_trees": false,
+    "force_row_wise": true,
+    "verbosity": -1
+  },
+  "best_iter": 25004,
+  "metrics_train": {
+    "rmse_log": 0.1525309304419162,
+    "r2_log": 0.9604384992319264,
+    "rmse_tl": 303711.6172366247,
+    "r2_tl": 0.9261604225077943,
+    "mae_tl": 100055.75588559221
+  },
+  "metrics_val": {
+    "rmse_log": 0.2305543371694561,
+    "r2_log": 0.9114078728513912,
+    "rmse_tl": 440283.0618238655,
+    "r2_tl": 0.8602928920225064,
+    "mae_tl": 156621.6725462386
+  },
+  "overfit_index": 1.5115251477289795
+}

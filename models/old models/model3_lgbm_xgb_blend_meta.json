@@ -1,0 +1,70 @@
+{
+  "seed": 42,
+  "threads": 10,
+  "loan_filter_enabled": true,
+  "drop_missing_over": 0.5,
+  "clip_quantiles": [
+    0.001,
+    0.995
+  ],
+  "dropped_columns": [
+    "Available for Loan",
+    "Pick Up Data Time_day",
+    "Pick Up Data Time_year"
+  ],
+  "metrics": {
+    "lightgbm": {
+      "rmse_log": 0.22481145707995967,
+      "r2_log": 0.9146340151965594,
+      "rmse_tl": 400005.19896082673,
+      "r2_tl": 0.8736217598059336,
+      "mae_tl": 145076.64475766002
+    },
+    "xgboost": {
+      "rmse_log": 0.23640480208856146,
+      "r2_log": 0.9056024848972506,
+      "rmse_tl": 432462.1380245729,
+      "r2_tl": 0.8522807092766722,
+      "mae_tl": 155069.52006502304
+    },
+    "blend": {
+      "rmse_log": 0.22232599651989965,
+      "r2_log": 0.9165111518901192,
+      "rmse_tl": 397559.719148614,
+      "r2_tl": 0.8751622933397113,
+      "mae_tl": 142670.47300991096
+    },
+    "blend_weight_lgbm": 0.7068024743606571,
+    "blend_weight_xgb": 0.29319752563934287
+  },
+  "best_iter": {
+    "lightgbm": 1282,
+    "xgboost": 8130
+  },
+  "params": {
+    "lightgbm": {
+      "n_estimators": 20000,
+      "learning_rate": 0.03,
+      "num_leaves": 128,
+      "min_child_samples": 50,
+      "subsample": 0.8,
+      "colsample_bytree": 0.8,
+      "reg_lambda": 2.0,
+      "reg_alpha": 0.0,
+      "early_stopping_rounds": 300
+    },
+    "xgboost": {
+      "num_boost_round": 20000,
+      "eta": 0.03,
+      "max_depth": 8,
+      "min_child_weight": 5.0,
+      "subsample": 0.8,
+      "colsample_bytree": 0.8,
+      "lambda": 2.0,
+      "alpha": 0.0,
+      "gamma": 0.0,
+      "early_stopping_rounds": 300,
+      "tree_method": "hist"
+    }
+  }
+}

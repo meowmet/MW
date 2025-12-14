@@ -1,0 +1,7 @@
+{
+  "q_low": 0.2,
+  "q_high": 0.8,
+  "t_buy": 0.13870891323177095,
+  "t_sell": 0.15176111794777988,
+  "definition": "FIRSAT if listing <= fair*(1-t_buy); PAHALI if listing >= fair*(1+t_sell); else NORMAL"
+}

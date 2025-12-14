@@ -1,0 +1,30 @@
+2025-12-13 15:49:14 | INFO | ========== START ==========
+2025-12-13 15:49:14 | INFO | os.cpu_count()=12 | threads=10
+2025-12-13 15:49:14 | INFO | env OMP_NUM_THREADS=10 MKL_NUM_THREADS=10
+2025-12-13 15:49:14 | INFO | versions: numpy=2.1.3 pandas=2.2.3 lightgbm=4.6.0
+2025-12-13 15:49:14 | INFO | [LOAD] Reading: hackathon_train_set.csv
+2025-12-13 15:49:14 | INFO | [CLEAN] Price parsed: kept 27843/27843 rows (dropped 0)
+2025-12-13 15:49:14 | INFO | [FILTER] Loan eligible: 27843 -> 24149
+2025-12-13 15:49:14 | INFO | [TARGET] clip q[0.001,0.995] => lo=90000.00, hi=9713000.00
+2025-12-13 15:49:14 | INFO | [TARGET] log(price) stats: mean=13.0767, std=0.7684
+2025-12-13 15:49:15 | INFO | [SPLIT] Train=(19319, 178) | Val=(4830, 178) | seed=42
+2025-12-13 15:49:15 | INFO | [PRE] done in 0m 00s
+2025-12-13 15:49:15 | INFO | [PRE] Train=(19319, 193) | Val=(4830, 193)
+2025-12-13 15:49:15 | INFO | [PRE] cat_cols=13 | binary_cols=160
+2025-12-13 15:49:15 | INFO | [DROP] all_missing=0 high_missing=0 constant=3 -> total_dropped=3
+2025-12-13 15:49:15 | INFO | [SAVE] schema: models\model2_schema_debug.json
+2025-12-13 15:49:15 | INFO | [TRAIN] Fitting LightGBM...
+2025-12-13 15:49:15 | INFO | [LGBM][1/20000] valid_0.rmse=0.751777 | elapsed=0m 00s | eta≈0m 00s
+2025-12-13 15:49:17 | INFO | [LGBM][200/20000] valid_0.rmse=0.234660 | elapsed=0m 01s | eta≈2m 49s
+2025-12-13 15:49:19 | INFO | [LGBM][400/20000] valid_0.rmse=0.226631 | elapsed=0m 03s | eta≈2m 43s
+2025-12-13 15:49:20 | INFO | [LGBM][600/20000] valid_0.rmse=0.224539 | elapsed=0m 04s | eta≈2m 41s
+2025-12-13 15:49:22 | INFO | [LGBM][800/20000] valid_0.rmse=0.223816 | elapsed=0m 06s | eta≈2m 37s
+2025-12-13 15:49:24 | INFO | [LGBM][1000/20000] valid_0.rmse=0.223570 | elapsed=0m 08s | eta≈2m 35s
+2025-12-13 15:49:25 | INFO | [LGBM][1200/20000] valid_0.rmse=0.223380 | elapsed=0m 09s | eta≈2m 36s
+2025-12-13 15:49:27 | INFO | [LGBM][1400/20000] valid_0.rmse=0.223418 | elapsed=0m 11s | eta≈2m 32s
+2025-12-13 15:49:28 | INFO | [TRAIN] done in 0m 12s | best_iter=1203
+2025-12-13 15:49:28 | INFO | ===== FINAL EVAL =====
+2025-12-13 15:49:28 | INFO | RMSE_LOG: 0.223376 | R2_LOG: 0.915721
+2025-12-13 15:49:28 | INFO | RMSE_TL : 396,667.20 | R2_TL : 0.875722 | MAE_TL: 143,807.13
+2025-12-13 15:49:28 | INFO | Residuals (log space) quantiles: min=-1.3149, p01=-0.5559, p05=-0.3374, median=-0.0047, p95=0.3579, p99=0.6279, max=1.6659
+2025-12-13 15:49:28 | INFO | Residual mean=0.001140, std=0.223373
