@@ -1,0 +1,128 @@
+PROJE SUNUM VE TEKNİK RAPOR DOSYASI
+
+========================================================================
+TAKIM ADI:MW
+
+TAKIM ÜYELERİ:
+Mehmet Nuri Erkan
+Abdulali Muhammed
+========================================================================
+1. PROJE ÖZETİ 
+
+İstanbul 2020 emlak ilanlarında fiyatların tutarsız ve yoruma açık olması, yatırımcıların "adil fiyatı" hızlıca görememesi sorununu çözüyoruz. İlanın özelliklerinden yapay zekâ ile Adil Değer (Fair Value) tahmin ediyor, kullanıcı fiyatı girerse Fırsat/Normal/Pahalı kararını matematiksel eşikler ile otomatik veriyoruz. Böylece kullanıcı, tek ekranda hem adil değeri hem de yatırım açısından net karar etiketini görerek hızlı aksiyon alabiliyor.
+========================================================================
+2. KURULUM VE ÇALIŞTIRMA (How to Run)
+2.1-Proje klasörünü açın ve terminal/PowerShell ile ana dizine gelin (requirements.txt ve Streamlit/ klasörü burada olmalı).
+
+cd <proje_klasoru>
+
+2.2-Sanal ortam oluşturup aktif edin.
+
+python -m venv .venv
+
+# Windows:
+
+.venv\Scripts\activate
+
+# Mac/Linux:
+
+source .venv/bin/activate
+
+2.3-Gerekli paketleri kurun.
+
+pip install -r requirements.txt
+
+2.4-Uygulamayı başlatın.
+
+streamlit run Streamlit/app.py
+
+2.5-Tarayıcıda açılan http://localhost:8501
+ adresinden demoyu kullanın:
+
+Live Demo: Tek ilan gir → Fair Value + (Price varsa) Fırsat/Normal/Pahalı
+
+CSV Batch: CSV yükle → toplu tahmin + indirilebilir sonuç
+========================================================================
+3. VERİ ÖN İŞLEME YAKLAŞIMI (Data Engineering)
+-Temizlenen Alanlar
+
+Kapsam / iş kuralı filtresi: Yatırım kararını gerçek senaryoya uygun kurmak için sadece krediye uygun ilanları tuttuk (Available_for_Loan = True). Böylece hedef dışı/gürültülü kayıtlar modele girmedi.
+
+Sütun eleme (kalite kontrol):
+
+Tamamı boş olan sütunlar kaldırıldı.
+
+Eksik oranı çok yüksek olan sütunlar eledik (modeli yanıltan ve genelleştirmeyi bozan alanlar).
+
+Tek değerli (constant) sütunlar kaldırıldı (bilgi taşımadığı için).
+
+Eksik değer işlemleri (robust imputing):
+
+Sayısal sütunlarda median/0 gibi güvenli doldurma,
+
+Kategorik sütunlarda “Unknown/None” doldurma uyguladık.
+
+Tip dönüşümü ve normalizasyon:
+
+Sayısal alanları numeric’e çevirdik; metin/kategorik alanlarda yazım farklarını, boşlukları ve tutarsız etiketleri normalize ettik.
+
+Aykırı değer yönetimi:
+
+Gerçekçi olmayan uç değerleri sınırlandırdık (clip/winsor ve gerekli alanlarda dönüşüm).
+
+-Eklenen Yeni Özellikler (Feature Engineering):
+
+Bina yaşı: BuildingAge = 2020 − BuildYear (fiyatla güçlü ilişkili temel sinyal).
+
+m² sinyalleri: Net/Gross m²’den türetilen yoğunluk/verimlilik göstergeleri.
+
+Kat bilgisi türetme: Kat/kat sayısı alanlarını anlamlı gruplara ayırma.
+
+Oda planı ayrıştırma: “2+1” formatlarından oda ve salon sayısını çıkarma.
+
+Amenity ayrıştırma: Olanakları tek bir alandan “var/yok” şeklinde ayrı sütunlara çevirme.
+
+Lokasyon standardizasyonu: İlçe/mahalle isimlerini normalize etme.
+
+-Seçilen Kritik Özellikler (Feature Selection):
+
+Model odaklı seçim: Ağaç tabanlı modellerin (LightGBM/XGBoost) özellik önem/katkı analizleriyle en etkili alanlar seçildi.
+
+Fiyata en çok etki eden ana gruplar: Lokasyon, Net/Gross m², Oda sayısı ve plan, Bina yaşı, Kat bilgisi.
+========================================================================
+4. MODEL MİMARİSİ
+
+Proje için kullanılan modeller LightGBM ve XGBoost gibi güçlü ağaç tabanlı algoritmalardır. Bu modeller, büyük veri setlerinde hızlı sonuçlar alırken yüksek doğruluk sağlar.
+
+Model Seçimi ve Kullanımı:
+
+LightGBM: Hızlı eğitim, düşük bellek kullanımı ve yüksek doğruluk sağlar. Özellikle büyük veri kümeleriyle daha verimli çalışır.
+
+XGBoost: Yüksek doğruluk ve stabilite sunar, ancak daha fazla hesaplama kaynağı gerektirir.
+
+Model Parametreleri ve Düzenleme:
+
+Hiperparametre optimizasyonu ile en iyi sonuçlar elde edilmiştir.
+
+Overfitting kontrolü için eğitim ve doğrulama setleri arasındaki farklar düzenli olarak izlenmiştir.
+========================================================================
+5. YATIRIM KARAR MANTIĞI (Business Logic)
+Adil Değer Hesaplama:
+
+Adil Değer (Fair Value) model tahminine dayanır.
+
+FIRSAT Eşiği: Price < FairValue × (1 − fırsat_eşiği)
+
+PAHALI Eşiği: Price > FairValue × (1 + pahalı_eşiği)
+
+Normal: Diğer tüm durumlar.
+========================================================================
+6. SİZİ DİĞERLERİNDEN AYIRAN ÖZELLİK (Unique Value)
+
+Canlı Analiz ve Dinamik Kullanıcı Arayüzü: Streamlit arayüzü, kullanıcıların anlık veri girişleri yaparak Fırsat/Normal/Pahalı kararlarını dinamik olarak alabilmelerine olanak tanır. Kullanıcılar, hem tek tek veri girişi hem de CSV yükleme seçenekleriyle modelin tahminlerini gerçek zamanlı olarak görebilirler. Ayrıca eşik değerlerini anlık olarak değiştirip, modelin tahminlerini anında gözlemleyebilirler.
+
+Reproducibility (Tekrar Üretilebilirlik): Model bundle'ı içerisinde eğitim ve doğrulama verilerini kaydederek, aynı sonuçların her seferinde tekrarlanmasını sağladık. Bu özellik, sistemin güvenilirliğini ve tutarlılığını artırır.
+
+Overfitting Teşhisi: Eğitim ve doğrulama verileri arasındaki farkları izleyerek, overfitting riskini minimize etmek için sürekli iyileştirmeler yapıldı. Modelin performansı her aşamada izlenerek, gereksiz öğrenme engellendi.
+
+Hata Analizi Çıktıları: Modelin tahmin performansı, Feature Importance ve val_predictions gibi dosyalarla detaylı şekilde analiz edilmiştir. Bu çıktılar, modelin hangi özelliklere daha fazla ağırlık verdiğini ve tahminlerdeki hata payını görselleştirir.

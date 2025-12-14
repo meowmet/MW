@@ -1,0 +1,15 @@
+# Core
+numpy>=1.23
+pandas>=1.5
+scipy>=1.9
+
+# Machine Learning
+scikit-learn>=1.2
+lightgbm>=4.0
+joblib>=1.2
+
+# App / UI
+streamlit>=1.28
+
+# Utilities
+python-dateutil>=2.8
