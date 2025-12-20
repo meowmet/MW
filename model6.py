@@ -1,7 +1,3 @@
-# model6_balanced.py
-# Optimized for low overfitting (target ~1.0) with better overall performance
-# Key improvements: Stronger regularization, better feature engineering, and ensemble-like stability
-
 import os
 import re
 import json
@@ -134,7 +130,6 @@ def detect_binary_like_cols(df: pd.DataFrame, max_unique: int = 3) -> List[str]:
 
     return cols
 
-
 def binary_to_01(series: pd.Series) -> np.ndarray:
     yes_set = {"1", "yes", "true", "evet", "var", "uygun", "eligible"}
     if pd.api.types.is_numeric_dtype(series):
@@ -231,9 +226,8 @@ class Preprocessor:
             gross_val = pd.to_numeric(df[self._gross_col], errors="coerce")
             ratio = net_val / np.clip(gross_val, 1e-6, np.inf)
             df["net_gross_ratio"] = ratio
-            engineered.append("net_gross_ratio")
-            
-            # Add area interaction features
+            engineered.append("net_gross_ratio")            
+
             df["net_x_gross"] = net_val * gross_val
             df["net_sqrt"] = np.sqrt(net_val.clip(0))
             df["gross_sqrt"] = np.sqrt(gross_val.clip(0))
@@ -246,7 +240,6 @@ class Preprocessor:
             df["building_age_bin"] = pd.cut(age_vals, bins=bins, labels=labels)
             engineered.append("building_age_bin")
             
-            # Age squared for non-linear effects
             df["building_age_squared"] = age_vals ** 2
             engineered.append("building_age_squared")
 
@@ -255,13 +248,12 @@ class Preprocessor:
             df["amenity_count"] = am_bin.sum(axis=1).astype(float)
             engineered.append("amenity_count")
             
-            # Amenity ratio feature
             df["amenity_density"] = am_bin.mean(axis=1).astype(float)
             engineered.append("amenity_density")
 
-        # Add price per area features if available
+  
         if self._net_col is not None:
-            # This will be filled after target is known in fit phase
+         
             df["has_net_area"] = pd.to_numeric(df[self._net_col], errors="coerce").notna().astype(float)
             engineered.append("has_net_area")
 
@@ -349,7 +341,7 @@ class RobustTargetEncoder:
         self.cols = cols
         self.n_splits = int(n_splits)
         self.seed = int(seed)
-        self.smoothing = float(smoothing)  # Increased smoothing for stability
+        self.smoothing = float(smoothing)  
         self.global_mean_ = None
         self.encodings_ = {}
 
@@ -524,44 +516,38 @@ def main():
     ap.add_argument("--threads", type=int, default=10)
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--test_size", type=float, default=0.20)
-
-    # Preprocessing toggles
+   
     ap.add_argument("--drop_missing_over", type=float, default=0.50)
     ap.add_argument("--clip_low_q", type=float, default=0.001)
     ap.add_argument("--clip_high_q", type=float, default=0.995)
-
-    # --- BALANCED CONFIGURATION FOR LOW OVERFITTING ---
-    # Conservative settings to achieve ~1.0 overfit index
+        
+    ap.add_argument("--n_estimators", type=int, default=15000)  
+    ap.add_argument("--lr", type=float, default=0.005) 
     
-    ap.add_argument("--n_estimators", type=int, default=15000)  # Reduced for faster convergence
-    ap.add_argument("--lr", type=float, default=0.005)  # Lower learning rate for stability
-
-    # TREE STRUCTURE: Shallow trees with conservative leaf counts
-    ap.add_argument("--num_leaves", type=int, default=31)   # Balanced complexity
-    ap.add_argument("--max_depth", type=int, default=4)     # Very shallow to prevent memorization
-    ap.add_argument("--min_child_samples", type=int, default=300)  # Higher for more generalization
-
-    # STOCHASTIC: Moderate randomness
-    ap.add_argument("--subsample", type=float, default=0.70)  # More data per tree
+    ap.add_argument("--num_leaves", type=int, default=31)   
+    ap.add_argument("--max_depth", type=int, default=4)     
+    ap.add_argument("--min_child_samples", type=int, default=300)  
+    
+    ap.add_argument("--subsample", type=float, default=0.70)  
     ap.add_argument("--subsample_freq", type=int, default=1)
-    ap.add_argument("--colsample", type=float, default=0.50)  # Balanced feature sampling
+    ap.add_argument("--colsample", type=float, default=0.50) 
 
-    # REGULARIZATION: Strong but balanced
-    ap.add_argument("--reg_lambda", type=float, default=100.0)  # Strong L2
-    ap.add_argument("--reg_alpha", type=float, default=50.0)    # Moderate L1
-    ap.add_argument("--min_gain_to_split", type=float, default=1.0)  # Higher threshold
+    
+    ap.add_argument("--reg_lambda", type=float, default=100.0)  
+    ap.add_argument("--reg_alpha", type=float, default=50.0)  
+    ap.add_argument("--min_gain_to_split", type=float, default=1.0)  
 
-    ap.add_argument("--extra_trees", action="store_true", default=True)  # Enable for stability
+    ap.add_argument("--extra_trees", action="store_true", default=True) 
     ap.add_argument("--force_row_wise", action="store_true", default=True)
 
-    ap.add_argument("--early_stopping_rounds", type=int, default=800)  # More patience
+    ap.add_argument("--early_stopping_rounds", type=int, default=800) 
     ap.add_argument("--log_every", type=int, default=1000)
 
-    # Target encoding with stronger smoothing
+    
     ap.add_argument("--use_target_encoding", action="store_true", default=True)
-    ap.add_argument("--te_min_unique", type=int, default=20)  # Lower threshold for more categories
+    ap.add_argument("--te_min_unique", type=int, default=20)  
     ap.add_argument("--te_splits", type=int, default=5)
-    ap.add_argument("--te_smoothing", type=float, default=50.0)  # Higher smoothing
+    ap.add_argument("--te_smoothing", type=float, default=50.0) 
 
     args = ap.parse_args()
 
@@ -577,11 +563,11 @@ def main():
     if "Price" not in df.columns:
         raise ValueError("Price column not found. Check file/sep/headers.")
 
-    # target clean
+
     df["Price_num"] = df["Price"].apply(clean_price_to_float)
     df = df[df["Price_num"].notna()].copy()
 
-    # loan filter
+
     before = len(df)
     df, did_filter, loan_col = filter_loan_eligible(df)
     after = len(df)
@@ -590,7 +576,7 @@ def main():
     else:
         log("[FILTER] Loan filter not applied.")
 
-    # clip bounds (save actual lo/hi values for reproducibility)
+    
     y_tl_raw = df["Price_num"].astype(float).to_numpy()
     lo = float(np.quantile(y_tl_raw, args.clip_low_q))
     hi = float(np.quantile(y_tl_raw, args.clip_high_q))
@@ -600,7 +586,6 @@ def main():
     X = df.drop(columns=["Price", "Price_num"], errors="ignore").copy()
     row_ids = df.index.to_numpy()
 
-    # split (and save ids!)
     X_train, X_val, y_train, y_val, id_train, id_val = train_test_split(
         X, y_log, row_ids,
         test_size=args.test_size,
@@ -608,7 +593,6 @@ def main():
     )
     log(f"[SPLIT] Train={X_train.shape} | Val={X_val.shape}")
 
-    # preprocess
     pre = Preprocessor(drop_missing_over=args.drop_missing_over, debug=True)
     pre.fit(X_train)
     Xt_train = pre.transform(X_train)
@@ -618,7 +602,6 @@ def main():
         st = pre.stats_
         log(f"[DROP] all_missing={st.all_missing} high_missing={st.high_missing} constant={st.constant} -> total_dropped={st.total_dropped}")
 
-    # optional TE
     te = None
     if args.use_target_encoding and len(pre.cat_cols_) > 0:
         high_card = []
@@ -637,7 +620,6 @@ def main():
     cat_cols = [c for c in Xt_train.columns if str(Xt_train[c].dtype) == "category"]
     log(f"[INFO] Xt_train={Xt_train.shape} | Xt_val={Xt_val.shape} | cat_cols={len(cat_cols)}")
 
-    # model
     model = lgb.LGBMRegressor(
         objective="regression",
         metric="rmse",
@@ -686,7 +668,6 @@ def main():
 
     log(f"[TRAIN] done in {int(train_sec//60)}m {int(train_sec%60)}s | best_iter={best_iter}")
 
-    # eval train/val
     pred_train = np.asarray(model.predict(Xt_train, num_iteration=best_iter), dtype=float)
     pred_val = np.asarray(model.predict(Xt_val, num_iteration=best_iter), dtype=float)
 
@@ -699,7 +680,6 @@ def main():
     log(f"[VAL  ] RMSE_LOG={m_val['rmse_log']:.6f} | R2_LOG={m_val['r2_log']:.6f} | RMSE_TL={m_val['rmse_tl']:,.2f} | MAE_TL={m_val['mae_tl']:,.2f}")
     log(f"[DIAG ] Overfit index={overfit_idx:.3f} -> {interpret_overfit_index(overfit_idx)}")
 
-    # save meta (for humans)
     meta = {
         "out_name": args.out_name,
         "seed": args.seed,
@@ -727,7 +707,6 @@ def main():
     with open(meta_path, "w", encoding="utf-8") as f:
         json.dump(meta, f, ensure_ascii=False, indent=2)
 
-    # save bundle
     bundle = {
         "preprocessor": pre,
         "target_encoder": te,
@@ -745,10 +724,10 @@ def main():
     log(f"[SAVE] meta: {meta_path}")
     log(f"[SAVE] bundle: {bundle_path}")
 
-    # self-check
     evaluate_bundle_on_saved_split(bundle_path=bundle_path, data_path=args.data, threads=args.threads)
 
     log("DONE")
 
 if __name__ == "__main__":
+
     main()
